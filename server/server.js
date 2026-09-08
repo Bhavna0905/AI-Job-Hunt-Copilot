@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const { PDFParse } = require("pdf-parse");
+const ollama = require("ollama").default;
 
 const app = express();
 
@@ -40,16 +41,42 @@ app.post("/api/resume/analyze", upload.single("resume"), async (req, res) => {
     // Free parser resources
     await parser.destroy();
 
+    const aiResponse = await ollama.chat({
+        model: "llama3.1:8b",
+        messages: [
+            {
+            role: "user",
+            content: `
+        You are an expert resume reviewer.
+
+        Analyze the following resume and provide:
+
+        1. Overall resume score out of 100
+        2. Top 3 strengths
+        3. Top 3 weaknesses
+        4. Top 5 improvement suggestions
+
+        Resume:
+        ${result.text}
+            `,
+            },
+        ],
+        });
+
+    const analysis = aiResponse.message.content;
+    
     res.json({
-      message: "Resume uploaded successfully",
+      message: "Resume analyzed successfully",
       fileName: req.file.originalname,
       text: result.text,
+      analysis: analysis,
     });
   } catch (error) {
-    console.error("PDF parsing error:", error);
+    console.error("FULL ERROR:", error);
 
     res.status(500).json({
       message: "Failed to process resume",
+      error: error.message,
     });
   }
 });

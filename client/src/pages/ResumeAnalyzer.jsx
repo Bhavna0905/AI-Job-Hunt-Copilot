@@ -2,6 +2,7 @@ import { useState } from "react";
 
 function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
+  const [analysis, setAnalysis] = useState(""); 
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -29,7 +30,7 @@ function ResumeAnalyzer() {
 
       const data = await response.json();
 
-      console.log("Resume analysis response:", data);
+      setAnalysis(data.analysis);
     } catch (error) {
       console.error("Error analyzing resume:", error);
     }
@@ -84,6 +85,8 @@ function ResumeAnalyzer() {
             </p>
           )}
 
+
+
         </div>
 
       </div>
@@ -96,6 +99,18 @@ function ResumeAnalyzer() {
         >
           Analyze Resume with AI ✨
         </button>
+      )}
+
+            {analysis && (
+        <div className="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-8">
+          <h3 className="text-2xl font-bold mb-4">
+            AI Resume Analysis 🤖
+          </h3>
+
+          <div className="text-gray-300 whitespace-pre-wrap leading-7">
+            {analysis}
+          </div>
+        </div>
       )}
 
     </div>
