@@ -9,9 +9,18 @@ function Interview() {
   const [answer, setAnswer] = useState("");
   const [evaluation, setEvaluation] = useState("");
 
+  const [questionNumber, setQuestionNumber] = useState(0);
+  const totalQuestions = 5;
+
+  const [interviewData, setInterviewData] = useState([]);
+
+  const [summary, setSummary] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const [nextLoading, setNextLoading] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
   const [error, setError] = useState("");
 
   // Start interview
@@ -26,6 +35,9 @@ function Interview() {
     setQuestion("");
     setAnswer("");
     setEvaluation("");
+    setSummary("");
+    setInterviewData([]);
+    setQuestionNumber(0);
 
     try {
       const response = await fetch(
@@ -52,6 +64,7 @@ function Interview() {
       }
 
       setQuestion(data.question);
+      setQuestionNumber(1);
     } catch (error) {
       console.error("Interview error:", error);
       setError(error.message);
@@ -60,7 +73,7 @@ function Interview() {
     }
   };
 
-  // Submit answer for evaluation
+  // Submit answer
   const handleSubmitAnswer = async () => {
     if (!answer.trim()) {
       setError("Please enter your answer.");
@@ -96,6 +109,17 @@ function Interview() {
       }
 
       setEvaluation(data.evaluation);
+
+      // Save this question, answer and evaluation
+      setInterviewData((prev) => [
+        ...prev,
+        {
+          questionNumber,
+          question,
+          answer,
+          evaluation: data.evaluation,
+        },
+      ]);
     } catch (error) {
       console.error("Evaluation error:", error);
       setError(error.message);
@@ -138,11 +162,51 @@ function Interview() {
       setQuestion(data.question);
       setAnswer("");
       setEvaluation("");
+      setQuestionNumber((prev) => prev + 1);
     } catch (error) {
       console.error("Next question error:", error);
       setError(error.message);
     } finally {
       setNextLoading(false);
+    }
+  };
+
+  // Generate final interview summary
+  const handleFinishInterview = async () => {
+    setSummaryLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/interview/summary",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            jobRole,
+            interviewType,
+            difficulty,
+            interviewData,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to generate interview summary"
+        );
+      }
+
+      setSummary(data.summary);
+    } catch (error) {
+      console.error("Summary error:", error);
+      setError(error.message);
+    } finally {
+      setSummaryLoading(false);
     }
   };
 
@@ -222,9 +286,16 @@ function Interview() {
           </p>
         )}
 
-        {/* Question */}
+        {/* Interview */}
         {question && (
           <div className="mt-6">
+
+            {/* Question Counter */}
+            <p className="text-sm text-gray-500 mb-2">
+              Question {questionNumber} / {totalQuestions}
+            </p>
+
+            {/* Question */}
             <div className="p-5 bg-gray-100 rounded-lg">
               <h3 className="font-semibold text-black mb-2">
                 AI Interviewer 🤖
@@ -271,18 +342,114 @@ function Interview() {
                   {evaluation}
                 </p>
 
-                {/* Next Question */}
-                <button
-                  onClick={handleNextQuestion}
-                  disabled={nextLoading}
-                  className="w-full mt-5 bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
-                >
-                  {nextLoading
-                    ? "Generating Next Question..."
-                    : "Next Question →"}
-                </button>
+                {/* Next / Finish */}
+                {questionNumber < totalQuestions ? (
+                  <button
+                    onClick={handleNextQuestion}
+                    disabled={nextLoading}
+                    className="w-full mt-5 bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                  >
+                    {nextLoading
+                      ? "Generating Next Question..."
+                      : "Next Question →"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleFinishInterview}
+                    disabled={summaryLoading}
+                    className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {summaryLoading
+                      ? "Generating Final Report..."
+                      : "Finish Interview ✓"}
+                  </button>
+                )}
               </div>
             )}
+
+            {/* Final Summary */}
+            {summary && (
+  <div className="mt-6 p-5 bg-gray-100 rounded-lg">
+    <h3 className="text-2xl font-bold text-black mb-6">
+      🎉 Interview Completed
+    </h3>
+
+    {/* Overall Score */}
+    <div className="bg-white rounded-lg p-5 mb-4 text-center">
+      <p className="text-gray-500 mb-2">
+        Overall Score
+      </p>
+
+      <p className="text-4xl font-bold text-black">
+        {summary.overallScore}/100
+      </p>
+    </div>
+
+    {/* Overall Performance */}
+    <div className="bg-white rounded-lg p-5 mb-4">
+      <h4 className="font-semibold text-black mb-2">
+        📊 Overall Performance
+      </h4>
+
+      <p className="text-gray-700">
+        {summary.overallPerformance}
+      </p>
+    </div>
+
+    {/* Strengths */}
+    <div className="bg-white rounded-lg p-5 mb-4">
+      <h4 className="font-semibold text-black mb-3">
+        💪 Strengths
+      </h4>
+
+      <ul className="list-disc pl-5 text-gray-700">
+        {summary.strengths.map((strength, index) => (
+          <li key={index} className="mb-1">
+            {strength}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Areas to Improve */}
+    <div className="bg-white rounded-lg p-5 mb-4">
+      <h4 className="font-semibold text-black mb-3">
+        ⚠️ Areas to Improve
+      </h4>
+
+      <ul className="list-disc pl-5 text-gray-700">
+        {summary.areasToImprove.map((area, index) => (
+          <li key={index} className="mb-1">
+            {area}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Hiring Recommendation */}
+    <div className="bg-white rounded-lg p-5 mb-4">
+      <h4 className="font-semibold text-black mb-2">
+        🎯 Hiring Recommendation
+      </h4>
+
+      <p className="font-semibold text-black">
+        {summary.hiringRecommendation}
+      </p>
+    </div>
+
+    {/* Final Feedback */}
+    <div className="bg-white rounded-lg p-5">
+      <h4 className="font-semibold text-black mb-2">
+        💬 Final Feedback
+      </h4>
+
+      <p className="text-gray-700">
+        {summary.finalFeedback}
+      </p>
+    </div>
+  </div>
+)}
+
           </div>
         )}
       </div>

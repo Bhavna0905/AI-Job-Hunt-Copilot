@@ -232,28 +232,42 @@ app.post("/api/interview/evaluate", async (req, res) => {
         {
           role: "user",
           content: `
-You are an expert technical interviewer.
+You are a strict technical interviewer evaluating a candidate's answer.
 
-Evaluate the candidate's answer for the following interview question.
+Job Role: ${jobRole}
 
-Job Role:
-${jobRole}
-
-Question:
+Interview Question:
 ${question}
 
 Candidate's Answer:
 ${answer}
 
-Provide:
+Evaluate the candidate based ONLY on how correctly and completely they answered the question.
 
+Scoring rules:
+- 90-100: Excellent. Correct, complete, and demonstrates strong understanding.
+- 75-89: Good. Mostly correct with only minor issues or missing details.
+- 50-74: Partial. Some correct understanding, but important concepts are missing or incorrect.
+- 25-49: Weak. The answer shows limited understanding and contains major mistakes.
+- 0-24: Wrong or irrelevant answer, no meaningful understanding, or the candidate does not answer the question.
+
+Important:
+- Do NOT give a high score just because the candidate sounds confident.
+- Do NOT reward an answer simply for being detailed.
+- Incorrect technical information must significantly reduce the score.
+- A partially correct answer must receive a partial score.
+- A completely incorrect answer must receive a very low score.
+- If the candidate says they don't know, cannot answer, or gives an irrelevant response, score it very low.
+- Judge the answer against the actual question, not against how well-written it is.
+
+Return:
 1. Score out of 100
 2. What the candidate did well
-3. What could be improved
+3. What was incorrect or missing
 4. A better sample answer
 
-Be constructive and professional.
-          `,
+Be strict and realistic, like an actual interviewer.
+`,
         },
       ],
     });
@@ -307,18 +321,11 @@ app.post("/api/interview/next", async (req, res) => {
         {
           role: "user",
           content: `
-You are an expert AI interviewer.
+You are an AI interviewer.
 
-Continue the interview for this candidate.
-
-Job Role:
-${jobRole}
-
-Interview Type:
-${interviewType}
-
-Difficulty:
-${difficulty}
+Job Role: ${jobRole}
+Interview Type: ${interviewType}
+Difficulty: ${difficulty}
 
 Previous Question:
 ${previousQuestion}
@@ -326,17 +333,17 @@ ${previousQuestion}
 Previous Answer:
 ${previousAnswer}
 
-Generate the NEXT interview question.
+Generate ONE new interview question.
 
 Rules:
-- Ask only ONE question.
 - Do not repeat the previous question.
-- Make the question relevant to the job role.
+- Keep it relevant to the job role.
 - Match the interview type and difficulty.
-- Build naturally on the previous answer when appropriate.
-- Do not provide the answer.
-- Keep the question clear and professional.
-          `,
+- Keep it concise.
+- Do not provide an answer.
+
+Return only the question.
+`,
         },
       ],
     });
@@ -358,9 +365,119 @@ Rules:
   }
 });
 
-// =====================================================
-// START SERVER
-// =====================================================
+// Generate final interview summary
+app.post("/api/interview/summary", async (req, res) => {
+  try {
+    const {
+      jobRole,
+      interviewType,
+      difficulty,
+      interviewData,
+    } = req.body;
+
+    if (!jobRole || !interviewType || !difficulty || !interviewData) {
+      return res.status(400).json({
+        message: "Interview details and interview data are required",
+      });
+    }
+
+    const aiResponse = await ollama.chat({
+      model: "llama3.1:8b",
+      messages: [
+        {
+          role: "user",
+          content: `
+You are an expert interview evaluator.
+
+Analyze the candidate's complete interview performance.
+
+Job Role:
+${jobRole}
+
+Interview Type:
+${interviewType}
+
+Difficulty:
+${difficulty}
+
+Interview Performance:
+${JSON.stringify(interviewData, null, 2)}
+
+Return ONLY valid JSON.
+
+Do not use Markdown.
+Do not use code blocks.
+Do not add any text before or after the JSON.
+
+Use exactly this structure:
+
+{
+  "overallScore": 75,
+  "overallPerformance": "Short overall assessment",
+  "strengths": [
+    "Strength 1",
+    "Strength 2",
+    "Strength 3"
+  ],
+  "areasToImprove": [
+    "Area 1",
+    "Area 2",
+    "Area 3"
+  ],
+  "finalFeedback": "Short final feedback",
+  "hiringRecommendation": "Potential Candidate"
+}
+
+The hiringRecommendation must be exactly one of:
+"Strong Candidate"
+"Potential Candidate"
+"Needs More Preparation"
+
+overallScore must be a number between 0 and 100.
+          `,
+        },
+      ],
+      format: "json",
+    });
+
+    const summary = JSON.parse(aiResponse.message.content);
+    
+    const scores = interviewData
+        .map((item) => {
+            const match = item.evaluation.match(/Score:\s*(\d{1,3})\s*\/\s*100/i);
+            return match ? Number(match[1]) : null;
+        })
+        .filter((score) => score !== null);
+
+        if (scores.length > 0) {
+        const averageScore =
+            scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+        summary.overallScore = Math.round(averageScore);
+
+        if (summary.overallScore >= 80) {
+            summary.hiringRecommendation = "Strong Candidate";
+        } else if (summary.overallScore >= 50) {
+            summary.hiringRecommendation = "Potential Candidate";
+        } else {
+            summary.hiringRecommendation = "Needs More Preparation";
+        }
+        }
+
+    res.json({
+      message: "Interview summary generated successfully",
+      summary,
+    });
+
+  } catch (error) {
+    console.error("Interview summary error:", error);
+
+    res.status(500).json({
+      message: "Failed to generate interview summary",
+      error: error.message,
+    });
+  }
+});
 
 const PORT = 5000;
 
