@@ -13,7 +13,6 @@ function ResumeAnalyzer() {
   };
 
   const handleAnalyze = async () => {
-    console.log("BUTTON CLICKED");
     if (!file) return;
 
     const formData = new FormData();
@@ -30,7 +29,9 @@ function ResumeAnalyzer() {
 
       const data = await response.json();
 
-      setAnalysis(data.analysis);
+        setAnalysis(data.analysis);
+
+        sessionStorage.setItem("resumeText", data.text);
     } catch (error) {
       console.error("Error analyzing resume:", error);
     }

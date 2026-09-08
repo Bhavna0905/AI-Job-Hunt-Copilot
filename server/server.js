@@ -64,7 +64,7 @@ app.post("/api/resume/analyze", upload.single("resume"), async (req, res) => {
         });
 
     const analysis = aiResponse.message.content;
-    
+
     res.json({
       message: "Resume analyzed successfully",
       fileName: req.file.originalname,
@@ -76,6 +76,61 @@ app.post("/api/resume/analyze", upload.single("resume"), async (req, res) => {
 
     res.status(500).json({
       message: "Failed to process resume",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/api/jobs/match", async (req, res) => {
+  try {
+    const { resumeText, jobDescription } = req.body;
+
+    if (!resumeText || !jobDescription) {
+      return res.status(400).json({
+        message: "Resume text and job description are required",
+      });
+    }
+
+    const aiResponse = await ollama.chat({
+      model: "llama3.1:8b",
+      messages: [
+        {
+          role: "user",
+          content: `
+You are an expert AI career advisor.
+
+Compare the candidate's resume with the given job description.
+
+Provide:
+
+1. Overall Match Score out of 100
+2. Top 5 Matching Skills
+3. Top 5 Missing or Weak Skills
+4. Why the candidate is a good fit
+5. Top 5 recommendations to improve their chances
+
+RESUME:
+${resumeText}
+
+JOB DESCRIPTION:
+${jobDescription}
+          `,
+        },
+      ],
+    });
+
+    const analysis = aiResponse.message.content;
+
+    res.json({
+      message: "Job matched successfully",
+      analysis,
+    });
+
+  } catch (error) {
+    console.error("Job matching error:", error);
+
+    res.status(500).json({
+      message: "Failed to match job",
       error: error.message,
     });
   }
