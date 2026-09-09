@@ -4,7 +4,6 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const { PDFParse } = require("pdf-parse");
-const ollama = require("ollama").default;
 const mongoose = require("mongoose");
 const Application = require("./models/Application");
 const bcrypt = require("bcryptjs");
@@ -12,6 +11,25 @@ const User = require("./models/User");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("./middleware/authMiddleware");
 const crypto = require("crypto");
+const Groq = require("groq-sdk");
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
+async function askAI(prompt) {
+  const completion = await groq.chat.completions.create({
+    model: "openai/gpt-oss-20b",
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  });
+
+  return completion.choices[0]?.message?.content || "";
+}
 
 const app = express();
 
@@ -380,30 +398,20 @@ app.post("/api/resume/analyze", upload.single("resume"), async (req, res) => {
     // Free parser resources
     await parser.destroy();
 
-    // Send resume to Ollama
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are an expert resume reviewer.
+    const analysis = await askAI(`
+      You are an expert resume reviewer.
 
-Analyze the following resume and provide:
+      Analyze the following resume and provide:
 
-1. Overall resume score out of 100
-2. Top 3 strengths
-3. Top 3 weaknesses
-4. Top 5 improvement suggestions
+      1. Overall resume score out of 100
+      2. Top 3 strengths
+      3. Top 3 weaknesses
+      4. Top 5 improvement suggestions
 
-Resume:
-${result.text}
-          `,
-        },
-      ],
-    });
+      Resume:
+      ${result.text}
+      `);
 
-    const analysis = aiResponse.message.content;
 
     res.json({
       message: "Resume analyzed successfully",
@@ -436,35 +444,25 @@ app.post("/api/jobs/match", async (req, res) => {
       });
     }
 
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are an expert AI career advisor.
+    const analysis = await askAI(`
+      You are an expert AI career advisor.
 
-Compare the candidate's resume with the given job description.
+      Compare the candidate's resume with the given job description.
 
-Provide:
+      Provide:
 
-1. Overall Match Score out of 100
-2. Top 5 Matching Skills
-3. Top 5 Missing or Weak Skills
-4. Why the candidate is a good fit
-5. Top 5 recommendations to improve their chances
+      1. Overall Match Score out of 100
+      2. Top 5 Matching Skills
+      3. Top 5 Missing or Weak Skills
+      4. Why the candidate is a good fit
+      5. Top 5 recommendations to improve their chances
 
-RESUME:
-${resumeText}
+      RESUME:
+      ${resumeText}
 
-JOB DESCRIPTION:
-${jobDescription}
-          `,
-        },
-      ],
-    });
-
-    const analysis = aiResponse.message.content;
+      JOB DESCRIPTION:
+      ${jobDescription}
+      `);
 
     res.json({
       message: "Job matched successfully",
@@ -499,35 +497,25 @@ app.post("/api/interview/start", async (req, res) => {
       });
     }
 
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are an expert AI interviewer.
+    const question = await askAI(`
+      You are an expert AI interviewer.
 
-Conduct an interview for the following candidate:
+      Conduct an interview for the following candidate:
 
-Job Role: ${jobRole}
-Interview Type: ${interviewType}
-Difficulty: ${difficulty}
+      Job Role: ${jobRole}
+      Interview Type: ${interviewType}
+      Difficulty: ${difficulty}
 
-Generate the FIRST interview question.
+      Generate the FIRST interview question.
 
-Rules:
-- Ask only ONE question.
-- Make it relevant to the job role.
-- Match the selected interview type.
-- Match the selected difficulty.
-- Do not provide the answer.
-- Keep the question clear and professional.
-          `,
-        },
-      ],
-    });
-
-    const question = aiResponse.message.content;
+      Rules:
+      - Ask only ONE question.
+      - Make it relevant to the job role.
+      - Match the selected interview type.
+      - Match the selected difficulty.
+      - Do not provide the answer.
+      - Keep the question clear and professional.
+      `);
 
     res.json({
       message: "Interview started successfully",
@@ -562,53 +550,43 @@ app.post("/api/interview/evaluate", async (req, res) => {
       });
     }
 
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are a strict technical interviewer evaluating a candidate's answer.
+    const evaluation = await askAI(`
+      You are a strict technical interviewer evaluating a candidate's answer.
 
-Job Role: ${jobRole}
+      Job Role: ${jobRole}
 
-Interview Question:
-${question}
+      Interview Question:
+      ${question}
 
-Candidate's Answer:
-${answer}
+      Candidate's Answer:
+      ${answer}
 
-Evaluate the candidate based ONLY on how correctly and completely they answered the question.
+      Evaluate the candidate based ONLY on how correctly and completely they answered the question.
 
-Scoring rules:
-- 90-100: Excellent. Correct, complete, and demonstrates strong understanding.
-- 75-89: Good. Mostly correct with only minor issues or missing details.
-- 50-74: Partial. Some correct understanding, but important concepts are missing or incorrect.
-- 25-49: Weak. The answer shows limited understanding and contains major mistakes.
-- 0-24: Wrong or irrelevant answer, no meaningful understanding, or the candidate does not answer the question.
+      Scoring rules:
+      - 90-100: Excellent. Correct, complete, and demonstrates strong understanding.
+      - 75-89: Good. Mostly correct with only minor issues or missing details.
+      - 50-74: Partial. Some correct understanding, but important concepts are missing or incorrect.
+      - 25-49: Weak. The answer shows limited understanding and contains major mistakes.
+      - 0-24: Wrong or irrelevant answer, no meaningful understanding, or the candidate does not answer the question.
 
-Important:
-- Do NOT give a high score just because the candidate sounds confident.
-- Do NOT reward an answer simply for being detailed.
-- Incorrect technical information must significantly reduce the score.
-- A partially correct answer must receive a partial score.
-- A completely incorrect answer must receive a very low score.
-- If the candidate says they don't know, cannot answer, or gives an irrelevant response, score it very low.
-- Judge the answer against the actual question, not against how well-written it is.
+      Important:
+      - Do NOT give a high score just because the candidate sounds confident.
+      - Do NOT reward an answer simply for being detailed.
+      - Incorrect technical information must significantly reduce the score.
+      - A partially correct answer must receive a partial score.
+      - A completely incorrect answer must receive a very low score.
+      - If the candidate says they don't know, cannot answer, or gives an irrelevant response, score it very low.
+      - Judge the answer against the actual question, not against how well-written it is.
 
-Return:
-1. Score out of 100
-2. What the candidate did well
-3. What was incorrect or missing
-4. A better sample answer
+      Return:
+      1. Score out of 100
+      2. What the candidate did well
+      3. What was incorrect or missing
+      4. A better sample answer
 
-Be strict and realistic, like an actual interviewer.
-`,
-        },
-      ],
-    });
-
-    const evaluation = aiResponse.message.content;
+      Be strict and realistic, like an actual interviewer.
+      `);
 
     res.json({
       message: "Answer evaluated successfully",
@@ -651,40 +629,30 @@ app.post("/api/interview/next", async (req, res) => {
       });
     }
 
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are an AI interviewer.
+    const question = await askAI(`
+      You are an AI interviewer.
 
-Job Role: ${jobRole}
-Interview Type: ${interviewType}
-Difficulty: ${difficulty}
+      Job Role: ${jobRole}
+      Interview Type: ${interviewType}
+      Difficulty: ${difficulty}
 
-Previous Question:
-${previousQuestion}
+      Previous Question:
+      ${previousQuestion}
 
-Previous Answer:
-${previousAnswer}
+      Previous Answer:
+      ${previousAnswer}
 
-Generate ONE new interview question.
+      Generate ONE new interview question.
 
-Rules:
-- Do not repeat the previous question.
-- Keep it relevant to the job role.
-- Match the interview type and difficulty.
-- Keep it concise.
-- Do not provide an answer.
+      Rules:
+      - Do not repeat the previous question.
+      - Keep it relevant to the job role.
+      - Match the interview type and difficulty.
+      - Keep it concise.
+      - Do not provide an answer.
 
-Return only the question.
-`,
-        },
-      ],
-    });
-
-    const question = aiResponse.message.content;
+      Return only the question.
+      `);
 
     res.json({
       message: "Next question generated successfully",
@@ -717,66 +685,70 @@ app.post("/api/interview/summary", async (req, res) => {
       });
     }
 
-    const aiResponse = await ollama.chat({
-      model: "llama3.1:8b",
+    const summaryResponse = await groq.chat.completions.create({
+      model: "openai/gpt-oss-20b",
       messages: [
         {
           role: "user",
           content: `
-You are an expert interview evaluator.
+    You are an expert interview evaluator.
 
-Analyze the candidate's complete interview performance.
+    Analyze the candidate's complete interview performance.
 
-Job Role:
-${jobRole}
+    Job Role:
+    ${jobRole}
 
-Interview Type:
-${interviewType}
+    Interview Type:
+    ${interviewType}
 
-Difficulty:
-${difficulty}
+    Difficulty:
+    ${difficulty}
 
-Interview Performance:
-${JSON.stringify(interviewData, null, 2)}
+    Interview Performance:
+    ${JSON.stringify(interviewData, null, 2)}
 
-Return ONLY valid JSON.
+    Return ONLY valid JSON.
 
-Do not use Markdown.
-Do not use code blocks.
-Do not add any text before or after the JSON.
+    Do not use Markdown.
+    Do not use code blocks.
+    Do not add any text before or after the JSON.
 
-Use exactly this structure:
+    Use exactly this structure:
 
-{
-  "overallScore": 75,
-  "overallPerformance": "Short overall assessment",
-  "strengths": [
-    "Strength 1",
-    "Strength 2",
-    "Strength 3"
-  ],
-  "areasToImprove": [
-    "Area 1",
-    "Area 2",
-    "Area 3"
-  ],
-  "finalFeedback": "Short final feedback",
-  "hiringRecommendation": "Potential Candidate"
-}
+    {
+      "overallScore": 75,
+      "overallPerformance": "Short overall assessment",
+      "strengths": [
+        "Strength 1",
+        "Strength 2",
+        "Strength 3"
+      ],
+      "areasToImprove": [
+        "Area 1",
+        "Area 2",
+        "Area 3"
+      ],
+      "finalFeedback": "Short final feedback",
+      "hiringRecommendation": "Potential Candidate"
+    }
 
-The hiringRecommendation must be exactly one of:
-"Strong Candidate"
-"Potential Candidate"
-"Needs More Preparation"
+    The hiringRecommendation must be exactly one of:
+    "Strong Candidate"
+    "Potential Candidate"
+    "Needs More Preparation"
 
-overallScore must be a number between 0 and 100.
+    overallScore must be a number between 0 and 100.
           `,
         },
       ],
-      format: "json",
+      response_format: {
+        type: "json_object",
+      },
     });
 
-    const summary = JSON.parse(aiResponse.message.content);
+    const summary = JSON.parse(
+      summaryResponse.choices[0].message.content
+    );
     
     const scores = interviewData
         .map((item) => {
@@ -815,7 +787,7 @@ overallScore must be a number between 0 and 100.
   }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
