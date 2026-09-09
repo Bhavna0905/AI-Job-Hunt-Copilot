@@ -6,6 +6,7 @@ const multer = require("multer");
 const { PDFParse } = require("pdf-parse");
 const ollama = require("ollama").default;
 const mongoose = require("mongoose");
+const Application = require("./models/Application");
 
 const app = express();
 
@@ -31,6 +32,117 @@ app.get("/", (req, res) => {
   res.json({
     message: "AI Job Hunt Copilot API is running 🚀",
   });
+});
+
+// =====================================================
+// APPLICATION TRACKER
+// =====================================================
+
+// GET all applications
+app.get("/api/applications", async (req, res) => {
+  try {
+    const applications = await Application.find().sort({ createdAt: -1 });
+
+    res.json(applications);
+  } catch (error) {
+    console.error("Fetch applications error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch applications",
+      error: error.message,
+    });
+  }
+});
+
+// POST a new application
+app.post("/api/applications", async (req, res) => {
+  try {
+    const { company, jobRole, status, date, notes } = req.body;
+
+    if (!company || !jobRole) {
+      return res.status(400).json({
+        message: "Company and job role are required",
+      });
+    }
+
+    const application = await Application.create({
+      company,
+      jobRole,
+      status,
+      date,
+      notes,
+    });
+
+    res.status(201).json(application);
+  } catch (error) {
+    console.error("Create application error:", error);
+
+    res.status(500).json({
+      message: "Failed to create application",
+      error: error.message,
+    });
+  }
+});
+
+// UPDATE an application
+app.put("/api/applications/:id", async (req, res) => {
+  try {
+    const { company, jobRole, status, date, notes } = req.body;
+
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      {
+        company,
+        jobRole,
+        status,
+        date,
+        notes,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    res.json(application);
+  } catch (error) {
+    console.error("Update application error:", error);
+
+    res.status(500).json({
+      message: "Failed to update application",
+      error: error.message,
+    });
+  }
+});
+
+// DELETE an application
+app.delete("/api/applications/:id", async (req, res) => {
+  try {
+    const application = await Application.findByIdAndDelete(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
+
+    res.json({
+      message: "Application deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete application error:", error);
+
+    res.status(500).json({
+      message: "Failed to delete application",
+      error: error.message,
+    });
+  }
 });
 
 // =====================================================
