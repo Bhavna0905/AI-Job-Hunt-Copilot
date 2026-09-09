@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
@@ -8,7 +15,6 @@ import Applications from "./pages/Applications";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -137,11 +143,6 @@ function App() {
         <Route
           path="/forgot-password"
           element={<ForgotPassword />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
         />
 
         {/* Protected Routes */}
