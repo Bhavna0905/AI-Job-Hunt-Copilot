@@ -3,23 +3,40 @@ import { useEffect, useState } from "react";
 function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Please login first.");
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(
-          "http://localhost:5000/api/applications"
+          "http://localhost:5000/api/applications",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch applications");
+          throw new Error(
+            data.message || "Failed to fetch applications"
+          );
         }
 
         setApplications(data);
       } catch (error) {
         console.error("Dashboard applications error:", error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -53,6 +70,12 @@ function Dashboard() {
       <p className="text-gray-400 mb-8">
         Welcome to your AI Job Hunt Copilot.
       </p>
+
+      {error && (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-8">
+          {error}
+        </div>
+      )}
 
       {/* Application Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">

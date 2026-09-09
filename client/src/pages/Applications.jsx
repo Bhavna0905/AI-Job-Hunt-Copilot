@@ -13,18 +13,32 @@ function Applications() {
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState(null);
 
-  // Fetch applications from MongoDB
   useEffect(() => {
     const fetchApplications = async () => {
       try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Please login first.");
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(
-          "http://localhost:5000/api/applications"
+          "http://localhost:5000/api/applications",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch applications");
+          throw new Error(
+            data.message || "Failed to fetch applications"
+          );
         }
 
         setApplications(data);
@@ -39,7 +53,6 @@ function Applications() {
     fetchApplications();
   }, []);
 
-  // Add or Update application
   const handleAddApplication = async (e) => {
     e.preventDefault();
 
@@ -50,6 +63,13 @@ function Applications() {
 
     try {
       setError("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Please login first.");
+        return;
+      }
 
       const applicationData = {
         company,
@@ -67,6 +87,7 @@ function Applications() {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(applicationData),
           }
@@ -97,6 +118,7 @@ function Applications() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(applicationData),
           }
@@ -125,16 +147,13 @@ function Applications() {
     }
   };
 
-  // Edit application
   const handleEdit = (application) => {
     setEditingId(application._id);
-
     setCompany(application.company);
     setJobRole(application.jobRole);
     setStatus(application.status);
     setDate(application.date || "");
     setNotes(application.notes || "");
-
     setError("");
 
     window.scrollTo({
@@ -143,7 +162,6 @@ function Applications() {
     });
   };
 
-  // Cancel edit
   const handleCancelEdit = () => {
     setEditingId(null);
     setCompany("");
@@ -154,15 +172,24 @@ function Applications() {
     setError("");
   };
 
-  // Delete application
   const handleDelete = async (id) => {
     try {
       setError("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Please login first.");
+        return;
+      }
 
       const response = await fetch(
         `http://localhost:5000/api/applications/${id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -178,7 +205,6 @@ function Applications() {
         prev.filter((application) => application._id !== id)
       );
 
-      // If deleting the application currently being edited
       if (editingId === id) {
         handleCancelEdit();
       }

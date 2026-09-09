@@ -10,6 +10,7 @@ const Application = require("./models/Application");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
 
@@ -152,10 +153,11 @@ app.post("/api/auth/login", async (req, res) => {
 // =====================================================
 
 // GET all applications
-app.get("/api/applications", async (req, res) => {
+app.get("/api/applications", authMiddleware, async (req, res) => {
   try {
-    const applications = await Application.find().sort({ createdAt: -1 });
-
+    const applications = await Application.find({
+      userId: req.user.userId,
+    }).sort({ createdAt: -1 });
     res.json(applications);
   } catch (error) {
     console.error("Fetch applications error:", error);
@@ -168,7 +170,7 @@ app.get("/api/applications", async (req, res) => {
 });
 
 // POST a new application
-app.post("/api/applications", async (req, res) => {
+app.post("/api/applications", authMiddleware, async (req, res) => {
   try {
     const { company, jobRole, status, date, notes } = req.body;
 
@@ -184,6 +186,7 @@ app.post("/api/applications", async (req, res) => {
       status,
       date,
       notes,
+      userId: req.user.userId,
     });
 
     res.status(201).json(application);
@@ -198,24 +201,27 @@ app.post("/api/applications", async (req, res) => {
 });
 
 // UPDATE an application
-app.put("/api/applications/:id", async (req, res) => {
+app.put("/api/applications/:id", authMiddleware, async (req, res) => {
   try {
     const { company, jobRole, status, date, notes } = req.body;
 
-    const application = await Application.findByIdAndUpdate(
-      req.params.id,
-      {
-        company,
-        jobRole,
-        status,
-        date,
-        notes,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const application = await Application.findOneAndUpdate(
+  {
+    _id: req.params.id,
+    userId: req.user.userId,
+  },
+  {
+    company,
+    jobRole,
+    status,
+    date,
+    notes,
+  },
+  {
+    new: true,
+    runValidators: true,
+  }
+);
 
     if (!application) {
       return res.status(404).json({
@@ -235,9 +241,12 @@ app.put("/api/applications/:id", async (req, res) => {
 });
 
 // DELETE an application
-app.delete("/api/applications/:id", async (req, res) => {
+app.delete("/api/applications/:id", authMiddleware, async (req, res) => {
   try {
-    const application = await Application.findByIdAndDelete(req.params.id);
+    const application = await Application.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
 
     if (!application) {
       return res.status(404).json({

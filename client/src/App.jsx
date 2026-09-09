@@ -5,6 +5,8 @@ import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import JobMatcher from "./pages/JobMatcher";
 import Interview from "./pages/Interview";
 import Applications from "./pages/Applications";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 
 function Layout({ children }) {
   return (
@@ -72,15 +74,25 @@ function App() {
     <BrowserRouter>
 
       <Routes>
+        
+       <Route
+    path="/login"
+    element={<Login />}
+  />
 
-        <Route
-          path="/"
-          element={
-            <Layout>
-              <Dashboard />
-            </Layout>
-          }
-        />
+  <Route
+    path="/signup"
+    element={<Signup />}
+  />
+
+  <Route
+    path="/"
+    element={
+      <Layout>
+        <Dashboard />
+      </Layout>
+    }
+  />
 
         <Route
           path="/resume"
