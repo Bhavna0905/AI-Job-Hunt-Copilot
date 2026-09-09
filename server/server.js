@@ -11,6 +11,7 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("./middleware/authMiddleware");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -143,6 +144,95 @@ app.post("/api/auth/login", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to login",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(
+      Date.now() + 15 * 60 * 1000
+    );
+
+    await user.save();
+
+    res.json({
+      message: "Password reset token generated successfully",
+      resetToken,
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+
+    res.status(500).json({
+      message: "Failed to process forgot password request",
+      error: error.message,
+    });
+  }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        message: "Token and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    res.json({
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+
+    res.status(500).json({
+      message: "Failed to reset password",
       error: error.message,
     });
   }

@@ -89,9 +89,19 @@ function Login() {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg p-3 mb-6 text-black bg-white"
+            className="w-full border rounded-lg p-3 mb-2 text-black bg-white"
             required
           />
+
+          <div className="text-right mb-6">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-gray-600 hover:text-black hover:underline"
+            >
+              Forgot Password?
+            </button>
+          </div>
 
           <button
             type="submit"
