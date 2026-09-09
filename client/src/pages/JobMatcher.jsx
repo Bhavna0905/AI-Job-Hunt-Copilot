@@ -21,7 +21,7 @@ function JobMatcher() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/jobs/match",
+        `${import.meta.env.VITE_API_URL}/api/jobs/match`,
         {
           method: "POST",
           headers: {

@@ -41,7 +41,7 @@ function Interview() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/interview/start",
+        `${import.meta.env.VITE_API_URL}/api/interview/start`,
         {
           method: "POST",
           headers: {
@@ -86,7 +86,7 @@ function Interview() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/interview/evaluate",
+        `${import.meta.env.VITE_API_URL}/api/interview/evaluate`,
         {
           method: "POST",
           headers: {
@@ -135,7 +135,7 @@ function Interview() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/interview/next",
+        `${import.meta.env.VITE_API_URL}/api/interview/next`,
         {
           method: "POST",
           headers: {
@@ -178,7 +178,7 @@ function Interview() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/interview/summary",
+        `${import.meta.env.VITE_API_URL}/api/interview/summary`,
         {
           method: "POST",
           headers: {

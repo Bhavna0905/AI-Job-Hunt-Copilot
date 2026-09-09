@@ -25,7 +25,7 @@ function Applications() {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/applications",
+           `${import.meta.env.VITE_API_URL}/api/applications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ function Applications() {
       // UPDATE
       if (editingId) {
         const response = await fetch(
-          `http://localhost:5000/api/applications/${editingId}`,
+          `${import.meta.env.VITE_API_URL}/api/applications/${editingId}`,
           {
             method: "PUT",
             headers: {
@@ -113,7 +113,7 @@ function Applications() {
       // ADD
       else {
         const response = await fetch(
-          "http://localhost:5000/api/applications",
+          `${import.meta.env.VITE_API_URL}/api/applications`,
           {
             method: "POST",
             headers: {
@@ -184,7 +184,7 @@ function Applications() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/applications/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/applications/${id}`,
         {
           method: "DELETE",
           headers: {
