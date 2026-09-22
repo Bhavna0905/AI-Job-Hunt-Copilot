@@ -1,14 +1,29 @@
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
-  const [analysis, setAnalysis] = useState(""); 
+
+  // Restore previous analysis
+  const [analysis, setAnalysis] = useState(
+    () => sessionStorage.getItem("resumeAnalysis") || ""
+  );
+
+  // Restore previous resume filename
+  const [savedFileName, setSavedFileName] = useState(
+    () => sessionStorage.getItem("resumeFileName") || ""
+  );
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
 
     if (selectedFile) {
       setFile(selectedFile);
+
+      // Save filename
+      setSavedFileName(selectedFile.name);
+      sessionStorage.setItem("resumeFileName", selectedFile.name);
     }
   };
 
@@ -29,9 +44,20 @@ function ResumeAnalyzer() {
 
       const data = await response.json();
 
-        setAnalysis(data.analysis);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze resume");
+      }
 
-        sessionStorage.setItem("resumeText", data.text);
+      // Save analysis in React state
+      setAnalysis(data.analysis);
+
+      // Save resume data
+      sessionStorage.setItem("resumeText", data.text);
+      sessionStorage.setItem("resumeAnalysis", data.analysis);
+      sessionStorage.setItem("resumeFileName", file.name);
+
+      setSavedFileName(file.name);
+
     } catch (error) {
       console.error("Error analyzing resume:", error);
     }
@@ -80,13 +106,25 @@ function ResumeAnalyzer() {
 
           </label>
 
+          {/* Newly selected file */}
           {file && (
             <p className="mt-5 text-green-400">
               Selected: {file.name}
             </p>
           )}
 
+          {/* Previously analyzed file */}
+          {!file && savedFileName && (
+            <div className="mt-5">
+              <p className="text-green-400">
+                ✓ Resume already analyzed
+              </p>
 
+              <p className="text-gray-400 text-sm mt-1">
+                {savedFileName}
+              </p>
+            </div>
+          )}
 
         </div>
 
@@ -102,14 +140,95 @@ function ResumeAnalyzer() {
         </button>
       )}
 
-            {analysis && (
+      {/* AI Analysis */}
+      {analysis && (
         <div className="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-8">
-          <h3 className="text-2xl font-bold mb-4">
+
+          <h3 className="text-2xl font-bold mb-6">
             AI Resume Analysis 🤖
           </h3>
 
-          <div className="text-gray-300 whitespace-pre-wrap leading-7">
-            {analysis}
+          <div className="text-gray-300 leading-7">
+
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-2xl font-bold text-white mt-6 mb-3">
+                    {children}
+                  </h1>
+                ),
+
+                h2: ({ children }) => (
+                  <h2 className="text-xl font-bold text-white mt-6 mb-3">
+                    {children}
+                  </h2>
+                ),
+
+                h3: ({ children }) => (
+                  <h3 className="text-lg font-semibold text-white mt-5 mb-2">
+                    {children}
+                  </h3>
+                ),
+
+                p: ({ children }) => (
+                  <p className="mb-4">
+                    {children}
+                  </p>
+                ),
+
+                strong: ({ children }) => (
+                  <strong className="font-bold text-white">
+                    {children}
+                  </strong>
+                ),
+
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-6 mb-4 space-y-2">
+                    {children}
+                  </ul>
+                ),
+
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-6 mb-4 space-y-2">
+                    {children}
+                  </ol>
+                ),
+
+                li: ({ children }) => (
+                  <li>
+                    {children}
+                  </li>
+                ),
+
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-6">
+                    <table className="w-full border-collapse border border-gray-700">
+                      {children}
+                    </table>
+                  </div>
+                ),
+
+                th: ({ children }) => (
+                  <th className="border border-gray-700 bg-gray-800 px-4 py-3 text-left text-white font-semibold">
+                    {children}
+                  </th>
+                ),
+
+                td: ({ children }) => (
+                  <td className="border border-gray-700 px-4 py-3">
+                    {children}
+                  </td>
+                ),
+
+                hr: () => (
+                  <hr className="border-gray-700 my-6" />
+                ),
+              }}
+            >
+              {analysis}
+            </ReactMarkdown>
+
           </div>
         </div>
       )}

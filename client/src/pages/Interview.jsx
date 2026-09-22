@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function Interview() {
   const [jobRole, setJobRole] = useState("");
@@ -210,6 +212,93 @@ function Interview() {
     }
   };
 
+  // Markdown styling for AI responses
+  const markdownComponents = {
+    strong: ({ children }) => (
+      <strong className="font-bold text-black">
+        {children}
+      </strong>
+    ),
+
+    h1: ({ children }) => (
+      <h1 className="text-xl font-bold text-black mt-4 mb-2">
+        {children}
+      </h1>
+    ),
+
+    h2: ({ children }) => (
+      <h2 className="text-lg font-bold text-black mt-4 mb-2">
+        {children}
+      </h2>
+    ),
+
+    h3: ({ children }) => (
+      <h3 className="text-base font-semibold text-black mt-4 mb-2">
+        {children}
+      </h3>
+    ),
+
+    p: ({ children }) => (
+      <p className="mb-3">
+        {children}
+      </p>
+    ),
+
+    ul: ({ children }) => (
+      <ul className="list-disc pl-6 mb-3 space-y-1">
+        {children}
+      </ul>
+    ),
+
+    ol: ({ children }) => (
+      <ol className="list-decimal pl-6 mb-3 space-y-1">
+        {children}
+      </ol>
+    ),
+
+    li: ({ children }) => (
+      <li>
+        {children}
+      </li>
+    ),
+
+    code: ({ children }) => (
+      <code className="bg-gray-200 px-1.5 py-0.5 rounded text-sm">
+        {children}
+      </code>
+    ),
+
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-gray-400 pl-4 my-3 text-gray-700">
+        {children}
+      </blockquote>
+    ),
+
+    hr: () => (
+      <hr className="border-gray-300 my-4" />
+    ),
+
+    table: ({ children }) => (
+      <div className="overflow-x-auto my-4">
+        <table className="w-full border-collapse border border-gray-300">
+          {children}
+        </table>
+      </div>
+    ),
+
+    th: ({ children }) => (
+      <th className="border border-gray-300 bg-gray-200 px-3 py-2 text-left font-semibold">
+        {children}
+      </th>
+    ),
+
+    td: ({ children }) => (
+      <td className="border border-gray-300 px-3 py-2">
+        {children}
+      </td>
+    ),
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-2">
@@ -297,13 +386,18 @@ function Interview() {
 
             {/* Question */}
             <div className="p-5 bg-gray-100 rounded-lg">
-              <h3 className="font-semibold text-black mb-2">
+              <h3 className="font-semibold text-black mb-3">
                 AI Interviewer 🤖
               </h3>
 
-              <p className="text-black whitespace-pre-line">
-                {question}
-              </p>
+              <div className="text-black leading-7">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}
+                >
+                  {question}
+                </ReactMarkdown>
+              </div>
             </div>
 
             {/* Answer */}
@@ -338,9 +432,14 @@ function Interview() {
                   AI Feedback 🤖
                 </h3>
 
-                <p className="text-black whitespace-pre-line">
-                  {evaluation}
-                </p>
+                <div className="text-black leading-7">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                  >
+                    {evaluation}
+                  </ReactMarkdown>
+                </div>
 
                 {/* Next / Finish */}
                 {questionNumber < totalQuestions ? (
@@ -369,86 +468,88 @@ function Interview() {
 
             {/* Final Summary */}
             {summary && (
-  <div className="mt-6 p-5 bg-gray-100 rounded-lg">
-    <h3 className="text-2xl font-bold text-black mb-6">
-      🎉 Interview Completed
-    </h3>
+              <div className="mt-6 p-5 bg-gray-100 rounded-lg">
 
-    {/* Overall Score */}
-    <div className="bg-white rounded-lg p-5 mb-4 text-center">
-      <p className="text-gray-500 mb-2">
-        Overall Score
-      </p>
+                <h3 className="text-2xl font-bold text-black mb-6">
+                  🎉 Interview Completed
+                </h3>
 
-      <p className="text-4xl font-bold text-black">
-        {summary.overallScore}/100
-      </p>
-    </div>
+                {/* Overall Score */}
+                <div className="bg-white rounded-lg p-5 mb-4 text-center">
+                  <p className="text-gray-500 mb-2">
+                    Overall Score
+                  </p>
 
-    {/* Overall Performance */}
-    <div className="bg-white rounded-lg p-5 mb-4">
-      <h4 className="font-semibold text-black mb-2">
-        📊 Overall Performance
-      </h4>
+                  <p className="text-4xl font-bold text-black">
+                    {summary.overallScore}/100
+                  </p>
+                </div>
 
-      <p className="text-gray-700">
-        {summary.overallPerformance}
-      </p>
-    </div>
+                {/* Overall Performance */}
+                <div className="bg-white rounded-lg p-5 mb-4">
+                  <h4 className="font-semibold text-black mb-2">
+                    📊 Overall Performance
+                  </h4>
 
-    {/* Strengths */}
-    <div className="bg-white rounded-lg p-5 mb-4">
-      <h4 className="font-semibold text-black mb-3">
-        💪 Strengths
-      </h4>
+                  <p className="text-gray-700">
+                    {summary.overallPerformance}
+                  </p>
+                </div>
 
-      <ul className="list-disc pl-5 text-gray-700">
-        {summary.strengths.map((strength, index) => (
-          <li key={index} className="mb-1">
-            {strength}
-          </li>
-        ))}
-      </ul>
-    </div>
+                {/* Strengths */}
+                <div className="bg-white rounded-lg p-5 mb-4">
+                  <h4 className="font-semibold text-black mb-3">
+                    💪 Strengths
+                  </h4>
 
-    {/* Areas to Improve */}
-    <div className="bg-white rounded-lg p-5 mb-4">
-      <h4 className="font-semibold text-black mb-3">
-        ⚠️ Areas to Improve
-      </h4>
+                  <ul className="list-disc pl-5 text-gray-700">
+                    {summary.strengths.map((strength, index) => (
+                      <li key={index} className="mb-1">
+                        {strength}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-      <ul className="list-disc pl-5 text-gray-700">
-        {summary.areasToImprove.map((area, index) => (
-          <li key={index} className="mb-1">
-            {area}
-          </li>
-        ))}
-      </ul>
-    </div>
+                {/* Areas to Improve */}
+                <div className="bg-white rounded-lg p-5 mb-4">
+                  <h4 className="font-semibold text-black mb-3">
+                    ⚠️ Areas to Improve
+                  </h4>
 
-    {/* Hiring Recommendation */}
-    <div className="bg-white rounded-lg p-5 mb-4">
-      <h4 className="font-semibold text-black mb-2">
-        🎯 Hiring Recommendation
-      </h4>
+                  <ul className="list-disc pl-5 text-gray-700">
+                    {summary.areasToImprove.map((area, index) => (
+                      <li key={index} className="mb-1">
+                        {area}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-      <p className="font-semibold text-black">
-        {summary.hiringRecommendation}
-      </p>
-    </div>
+                {/* Hiring Recommendation */}
+                <div className="bg-white rounded-lg p-5 mb-4">
+                  <h4 className="font-semibold text-black mb-2">
+                    🎯 Hiring Recommendation
+                  </h4>
 
-    {/* Final Feedback */}
-    <div className="bg-white rounded-lg p-5">
-      <h4 className="font-semibold text-black mb-2">
-        💬 Final Feedback
-      </h4>
+                  <p className="font-semibold text-black">
+                    {summary.hiringRecommendation}
+                  </p>
+                </div>
 
-      <p className="text-gray-700">
-        {summary.finalFeedback}
-      </p>
-    </div>
-  </div>
-)}
+                {/* Final Feedback */}
+                <div className="bg-white rounded-lg p-5">
+                  <h4 className="font-semibold text-black mb-2">
+                    💬 Final Feedback
+                  </h4>
+
+                  <p className="text-gray-700">
+                    {summary.finalFeedback}
+                  </p>
+                </div>
+
+              </div>
+            )}
 
           </div>
         )}
