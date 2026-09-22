@@ -8,7 +8,7 @@ function JobMatcher() {
     () => sessionStorage.getItem("jobDescription") || ""
   );
 
-  // Restore previous analysis too
+  // Restore previous analysis
   const [analysis, setAnalysis] = useState(
     () => sessionStorage.getItem("jobMatchAnalysis") || ""
   );
@@ -57,7 +57,6 @@ function JobMatcher() {
 
       // Save JD
       sessionStorage.setItem("jobDescription", jobDescription);
-
     } catch (error) {
       console.error("Job matching error:", error);
       alert("Failed to match resume with job.");
@@ -76,68 +75,120 @@ function JobMatcher() {
   };
 
   return (
-    <div className="max-w-5xl">
+    <div className="min-h-screen bg-[#050505] text-white p-8">
 
-      <h2 className="text-3xl font-bold">
-        Job Matcher 💼
-      </h2>
+      {/* Header */}
+      <div className="mb-10">
 
-      <p className="text-gray-400 mt-2">
-        Compare your resume with a job description using AI.
-      </p>
+        <p className="text-xs uppercase tracking-[0.2em] text-[#ff2d8d] mb-3">
+          Job Matching
+        </p>
 
-      <div className="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          Job Matcher
+        </h1>
 
-        <label className="block text-lg font-semibold mb-3">
-          Job Description
-        </label>
+        <p className="text-gray-500 mt-3">
+          Compare your resume with a job description using AI.
+        </p>
+
+      </div>
+
+      {/* Job Description Card */}
+      <div className="max-w-5xl bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7">
+
+        <div className="mb-6">
+
+          <h2 className="text-xl font-semibold">
+            Job Description
+          </h2>
+
+          <p className="text-sm text-gray-600 mt-1">
+            Paste the job description you want to match against your resume.
+          </p>
+
+        </div>
 
         <textarea
           value={jobDescription}
           onChange={handleJobDescriptionChange}
           placeholder="Paste the job description here..."
-          className="w-full h-64 bg-gray-950 border border-gray-700 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+          className="w-full min-h-[280px] bg-[#080808] border border-white/[0.08] rounded-xl p-5 text-sm text-gray-200 placeholder-gray-600 resize-y focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
         />
 
+        {/* Character count */}
+        <div className="flex justify-end mt-2">
+          <span className="text-xs text-gray-700">
+            {jobDescription.length} characters
+          </span>
+        </div>
+
+        {/* Match Button */}
         <button
           onClick={handleMatch}
-          disabled={loading}
-          className="mt-6 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-8 py-3 rounded-lg font-medium transition"
+          disabled={loading || !jobDescription.trim()}
+          className="mt-5 px-7 py-3 rounded-xl bg-[#ff2d8d] text-white text-sm font-medium hover:bg-[#ff469a] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,45,141,0.12)] hover:shadow-[0_0_25px_rgba(255,45,141,0.22)] transition-all"
         >
-          {loading
-            ? "Analyzing... 🤖"
-            : "Match Resume with Job 🤖"}
+          {loading ? "Analyzing..." : "Match Resume with Job"}
         </button>
 
       </div>
 
       {/* AI Analysis */}
       {analysis && (
-        <div className="mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <div className="max-w-5xl mt-8 bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7">
 
-          <h3 className="text-2xl font-bold mb-6">
-            AI Job Match Analysis 🤖
-          </h3>
+          {/* Analysis Header */}
+          <div className="flex items-center justify-between mb-7">
 
-          <div className="text-gray-300 leading-7">
+            <div>
+              <p className="text-xs uppercase tracking-[0.15em] text-[#ff2d8d] mb-2">
+                AI Analysis
+              </p>
+
+              <h2 className="text-2xl font-semibold">
+                Job Match Analysis
+              </h2>
+            </div>
+
+            <div className="w-10 h-10 rounded-xl border border-[#ff2d8d]/20 bg-[#ff2d8d]/5 flex items-center justify-center">
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                className="w-5 h-5 text-[#ff2d8d]"
+              >
+                <path d="M9 12l2 2 4-4" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+
+            </div>
+
+          </div>
+
+          {/* Markdown */}
+          <div className="text-gray-400 leading-7">
 
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
+
                 h1: ({ children }) => (
-                  <h1 className="text-2xl font-bold text-white mt-6 mb-3">
+                  <h1 className="text-2xl font-bold text-white mt-8 mb-4">
                     {children}
                   </h1>
                 ),
 
                 h2: ({ children }) => (
-                  <h2 className="text-xl font-bold text-white mt-6 mb-3">
+                  <h2 className="text-xl font-bold text-white mt-8 mb-4">
                     {children}
                   </h2>
                 ),
 
                 h3: ({ children }) => (
-                  <h3 className="text-lg font-semibold text-white mt-5 mb-2">
+                  <h3 className="text-lg font-semibold text-white mt-6 mb-3">
                     {children}
                   </h3>
                 ),
@@ -149,58 +200,72 @@ function JobMatcher() {
                 ),
 
                 strong: ({ children }) => (
-                  <strong className="font-bold text-white">
+                  <strong className="font-semibold text-white">
                     {children}
                   </strong>
                 ),
 
                 ul: ({ children }) => (
-                  <ul className="list-disc pl-6 mb-4 space-y-2">
+                  <ul className="list-disc pl-6 mb-5 space-y-2">
                     {children}
                   </ul>
                 ),
 
                 ol: ({ children }) => (
-                  <ol className="list-decimal pl-6 mb-4 space-y-2">
+                  <ol className="list-decimal pl-6 mb-5 space-y-2">
                     {children}
                   </ol>
                 ),
 
                 li: ({ children }) => (
-                  <li>
+                  <li className="pl-1">
                     {children}
                   </li>
                 ),
 
                 table: ({ children }) => (
-                  <div className="overflow-x-auto my-6">
-                    <table className="w-full border-collapse border border-gray-700">
+                  <div className="overflow-x-auto my-7 rounded-xl border border-white/[0.08]">
+                    <table className="w-full border-collapse">
                       {children}
                     </table>
                   </div>
                 ),
 
                 th: ({ children }) => (
-                  <th className="border border-gray-700 bg-gray-800 px-4 py-3 text-left text-white font-semibold">
+                  <th className="border-b border-white/[0.08] bg-[#111111] px-4 py-3 text-left text-white font-semibold text-sm">
                     {children}
                   </th>
                 ),
 
                 td: ({ children }) => (
-                  <td className="border border-gray-700 px-4 py-3">
+                  <td className="border-b border-white/[0.06] px-4 py-3 text-sm text-gray-400">
                     {children}
                   </td>
                 ),
 
                 hr: () => (
-                  <hr className="border-gray-700 my-6" />
+                  <hr className="border-white/[0.08] my-7" />
                 ),
+
+                code: ({ children }) => (
+                  <code className="px-1.5 py-0.5 rounded bg-white/[0.06] text-[#ff65ab] text-sm">
+                    {children}
+                  </code>
+                ),
+
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-2 border-[#ff2d8d] pl-4 my-5 text-gray-500">
+                    {children}
+                  </blockquote>
+                ),
+
               }}
             >
               {analysis}
             </ReactMarkdown>
 
           </div>
+
         </div>
       )}
 

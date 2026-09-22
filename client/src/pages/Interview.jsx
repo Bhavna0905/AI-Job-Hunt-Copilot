@@ -112,7 +112,6 @@ function Interview() {
 
       setEvaluation(data.evaluation);
 
-      // Save this question, answer and evaluation
       setInterviewData((prev) => [
         ...prev,
         {
@@ -212,197 +211,262 @@ function Interview() {
     }
   };
 
-  // Markdown styling for AI responses
+  // Markdown styling
   const markdownComponents = {
     strong: ({ children }) => (
-      <strong className="font-bold text-black">
+      <strong className="font-semibold text-white">
         {children}
       </strong>
     ),
 
     h1: ({ children }) => (
-      <h1 className="text-xl font-bold text-black mt-4 mb-2">
+      <h1 className="text-2xl font-bold text-white mt-6 mb-3">
         {children}
       </h1>
     ),
 
     h2: ({ children }) => (
-      <h2 className="text-lg font-bold text-black mt-4 mb-2">
+      <h2 className="text-xl font-bold text-white mt-6 mb-3">
         {children}
       </h2>
     ),
 
     h3: ({ children }) => (
-      <h3 className="text-base font-semibold text-black mt-4 mb-2">
+      <h3 className="text-lg font-semibold text-white mt-5 mb-2">
         {children}
       </h3>
     ),
 
     p: ({ children }) => (
-      <p className="mb-3">
+      <p className="mb-4">
         {children}
       </p>
     ),
 
     ul: ({ children }) => (
-      <ul className="list-disc pl-6 mb-3 space-y-1">
+      <ul className="list-disc pl-6 mb-4 space-y-2">
         {children}
       </ul>
     ),
 
     ol: ({ children }) => (
-      <ol className="list-decimal pl-6 mb-3 space-y-1">
+      <ol className="list-decimal pl-6 mb-4 space-y-2">
         {children}
       </ol>
     ),
 
     li: ({ children }) => (
-      <li>
-        {children}
-      </li>
+      <li>{children}</li>
     ),
 
     code: ({ children }) => (
-      <code className="bg-gray-200 px-1.5 py-0.5 rounded text-sm">
+      <code className="bg-white/[0.06] text-[#ff65ab] px-1.5 py-0.5 rounded text-sm">
         {children}
       </code>
     ),
 
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-gray-400 pl-4 my-3 text-gray-700">
+      <blockquote className="border-l-2 border-[#ff2d8d] pl-4 my-4 text-gray-500">
         {children}
       </blockquote>
     ),
 
     hr: () => (
-      <hr className="border-gray-300 my-4" />
+      <hr className="border-white/[0.08] my-6" />
     ),
 
     table: ({ children }) => (
-      <div className="overflow-x-auto my-4">
-        <table className="w-full border-collapse border border-gray-300">
+      <div className="overflow-x-auto my-6 rounded-xl border border-white/[0.08]">
+        <table className="w-full border-collapse">
           {children}
         </table>
       </div>
     ),
 
     th: ({ children }) => (
-      <th className="border border-gray-300 bg-gray-200 px-3 py-2 text-left font-semibold">
+      <th className="border-b border-white/[0.08] bg-[#111111] px-4 py-3 text-left text-white font-semibold text-sm">
         {children}
       </th>
     ),
 
     td: ({ children }) => (
-      <td className="border border-gray-300 px-3 py-2">
+      <td className="border-b border-white/[0.06] px-4 py-3 text-sm text-gray-400">
         {children}
       </td>
     ),
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-2">
-        AI Interview 🎤
-      </h1>
+    <div className="min-h-screen bg-[#050505] text-white p-8">
 
-      <p className="text-gray-400 mb-8">
-        Practice interviews with an AI interviewer.
-      </p>
+      {/* Header */}
+      <div className="mb-10">
 
-      <div className="max-w-xl bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-6 text-black">
-          Interview Setup
-        </h2>
+        <p className="text-xs uppercase tracking-[0.2em] text-[#ff2d8d] mb-3">
+          Interview Practice
+        </p>
+
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          AI Interview
+        </h1>
+
+        <p className="text-gray-500 mt-3">
+          Practice interviews with an AI interviewer and get real-time feedback.
+        </p>
+
+      </div>
+
+      {/* Interview Setup */}
+      <div className="max-w-3xl bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7">
+
+        <div className="mb-7">
+          <h2 className="text-xl font-semibold">
+            Interview Setup
+          </h2>
+
+          <p className="text-sm text-gray-600 mt-1">
+            Configure your interview before getting started.
+          </p>
+        </div>
 
         {/* Job Role */}
-        <label className="block mb-2 font-medium text-black">
-          Job Role
-        </label>
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Job Role
+          </label>
 
-        <input
-          type="text"
-          placeholder="e.g. Full Stack Developer"
-          value={jobRole}
-          onChange={(e) => setJobRole(e.target.value)}
-          className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
-        />
+          <input
+            type="text"
+            placeholder="e.g. Full Stack Developer"
+            value={jobRole}
+            onChange={(e) => setJobRole(e.target.value)}
+            className="w-full bg-[#080808] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
+          />
+        </div>
 
         {/* Interview Type */}
-        <label className="block mb-2 font-medium text-black">
-          Interview Type
-        </label>
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Interview Type
+          </label>
 
-        <select
-          value={interviewType}
-          onChange={(e) => setInterviewType(e.target.value)}
-          className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
-        >
-          <option>Technical</option>
-          <option>Behavioral</option>
-          <option>Mixed</option>
-        </select>
+          <select
+            value={interviewType}
+            onChange={(e) => setInterviewType(e.target.value)}
+            className="w-full bg-[#080808] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
+          >
+            <option className="bg-[#0b0b0b]">Technical</option>
+            <option className="bg-[#0b0b0b]">Behavioral</option>
+            <option className="bg-[#0b0b0b]">Mixed</option>
+          </select>
+        </div>
 
         {/* Difficulty */}
-        <label className="block mb-2 font-medium text-black">
-          Difficulty
-        </label>
+        <div className="mb-7">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Difficulty
+          </label>
 
-        <select
-          value={difficulty}
-          onChange={(e) => setDifficulty(e.target.value)}
-          className="w-full border rounded-lg p-3 mb-6 text-black bg-white"
-        >
-          <option>Easy</option>
-          <option>Medium</option>
-          <option>Hard</option>
-        </select>
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="w-full bg-[#080808] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
+          >
+            <option className="bg-[#0b0b0b]">Easy</option>
+            <option className="bg-[#0b0b0b]">Medium</option>
+            <option className="bg-[#0b0b0b]">Hard</option>
+          </select>
+        </div>
 
-        {/* Start Interview */}
+        {/* Start Button */}
         <button
           onClick={handleStartInterview}
           disabled={loading}
-          className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+          className="w-full py-3 rounded-xl bg-[#ff2d8d] text-white text-sm font-medium hover:bg-[#ff469a] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,45,141,0.12)] hover:shadow-[0_0_25px_rgba(255,45,141,0.22)] transition-all"
         >
-          {loading
-            ? "Generating Question..."
-            : "Start Interview"}
+          {loading ? "Generating Question..." : "Start Interview"}
         </button>
 
         {/* Error */}
         {error && (
-          <p className="mt-4 text-red-600">
-            {error}
-          </p>
-        )}
-
-        {/* Interview */}
-        {question && (
-          <div className="mt-6">
-
-            {/* Question Counter */}
-            <p className="text-sm text-gray-500 mb-2">
-              Question {questionNumber} / {totalQuestions}
+          <div className="mt-5 px-4 py-3 rounded-xl border border-red-500/20 bg-red-500/5">
+            <p className="text-sm text-red-400">
+              {error}
             </p>
+          </div>
+        )}
+      </div>
 
-            {/* Question */}
-            <div className="p-5 bg-gray-100 rounded-lg">
-              <h3 className="font-semibold text-black mb-3">
-                AI Interviewer 🤖
-              </h3>
+      {/* Active Interview */}
+      {question && (
+        <div className="max-w-3xl mt-8">
 
-              <div className="text-black leading-7">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={markdownComponents}
+          {/* Progress */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-gray-500">
+              Question {questionNumber} of {totalQuestions}
+            </span>
+
+            <span className="text-sm text-[#ff2d8d]">
+              {Math.round((questionNumber / totalQuestions) * 100)}%
+            </span>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-7">
+            <div
+              className="h-full bg-[#ff2d8d] rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(255,45,141,0.4)]"
+              style={{
+                width: `${(questionNumber / totalQuestions) * 100}%`,
+              }}
+            />
+          </div>
+
+          {/* Question Card */}
+          <div className="bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7">
+
+            <div className="flex items-center gap-3 mb-6">
+
+              <div className="w-9 h-9 rounded-lg bg-[#ff2d8d]/10 border border-[#ff2d8d]/20 flex items-center justify-center">
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  className="w-5 h-5 text-[#ff2d8d]"
                 >
-                  {question}
-                </ReactMarkdown>
+                  <path d="M12 3a8 8 0 0 0-8 8c0 2.1.8 4 2.2 5.4L5 21l4.6-1.7A8 8 0 1 0 12 3Z" />
+                  <path d="M9 11h.01M15 11h.01" />
+                </svg>
+
               </div>
+
+              <div>
+                <p className="text-sm font-medium text-white">
+                  Interview Question
+                </p>
+
+                <p className="text-xs text-gray-600">
+                  {interviewType} · {difficulty}
+                </p>
+              </div>
+
+            </div>
+
+            <div className="text-gray-400 leading-7">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={markdownComponents}
+              >
+                {question}
+              </ReactMarkdown>
             </div>
 
             {/* Answer */}
-            <div className="mt-5">
-              <label className="block mb-2 font-medium text-black">
+            <div className="mt-8 pt-7 border-t border-white/[0.06]">
+
+              <label className="block text-sm font-medium text-gray-300 mb-3">
                 Your Answer
               </label>
 
@@ -410,150 +474,221 @@ function Interview() {
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Type your answer here..."
-                rows="6"
-                className="w-full border rounded-lg p-3 text-black bg-white resize-none"
+                rows="7"
+                className="w-full bg-[#080808] border border-white/[0.08] rounded-xl p-4 text-sm text-gray-200 placeholder-gray-600 resize-none focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
               />
 
               <button
                 onClick={handleSubmitAnswer}
                 disabled={evaluating}
-                className="w-full mt-4 bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+                className="w-full mt-4 py-3 rounded-xl bg-[#ff2d8d] text-white text-sm font-medium hover:bg-[#ff469a] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_18px_rgba(255,45,141,0.1)] transition-all"
               >
-                {evaluating
-                  ? "Evaluating Answer..."
-                  : "Submit Answer"}
+                {evaluating ? "Evaluating Answer..." : "Submit Answer"}
               </button>
+
             </div>
 
-            {/* Evaluation */}
-            {evaluation && (
-              <div className="mt-6 p-5 bg-gray-100 rounded-lg">
-                <h3 className="font-semibold text-black mb-3">
-                  AI Feedback 🤖
-                </h3>
-
-                <div className="text-black leading-7">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={markdownComponents}
-                  >
-                    {evaluation}
-                  </ReactMarkdown>
-                </div>
-
-                {/* Next / Finish */}
-                {questionNumber < totalQuestions ? (
-                  <button
-                    onClick={handleNextQuestion}
-                    disabled={nextLoading}
-                    className="w-full mt-5 bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50"
-                  >
-                    {nextLoading
-                      ? "Generating Next Question..."
-                      : "Next Question →"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleFinishInterview}
-                    disabled={summaryLoading}
-                    className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {summaryLoading
-                      ? "Generating Final Report..."
-                      : "Finish Interview ✓"}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Final Summary */}
-            {summary && (
-              <div className="mt-6 p-5 bg-gray-100 rounded-lg">
-
-                <h3 className="text-2xl font-bold text-black mb-6">
-                  🎉 Interview Completed
-                </h3>
-
-                {/* Overall Score */}
-                <div className="bg-white rounded-lg p-5 mb-4 text-center">
-                  <p className="text-gray-500 mb-2">
-                    Overall Score
-                  </p>
-
-                  <p className="text-4xl font-bold text-black">
-                    {summary.overallScore}/100
-                  </p>
-                </div>
-
-                {/* Overall Performance */}
-                <div className="bg-white rounded-lg p-5 mb-4">
-                  <h4 className="font-semibold text-black mb-2">
-                    📊 Overall Performance
-                  </h4>
-
-                  <p className="text-gray-700">
-                    {summary.overallPerformance}
-                  </p>
-                </div>
-
-                {/* Strengths */}
-                <div className="bg-white rounded-lg p-5 mb-4">
-                  <h4 className="font-semibold text-black mb-3">
-                    💪 Strengths
-                  </h4>
-
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {summary.strengths.map((strength, index) => (
-                      <li key={index} className="mb-1">
-                        {strength}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Areas to Improve */}
-                <div className="bg-white rounded-lg p-5 mb-4">
-                  <h4 className="font-semibold text-black mb-3">
-                    ⚠️ Areas to Improve
-                  </h4>
-
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {summary.areasToImprove.map((area, index) => (
-                      <li key={index} className="mb-1">
-                        {area}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Hiring Recommendation */}
-                <div className="bg-white rounded-lg p-5 mb-4">
-                  <h4 className="font-semibold text-black mb-2">
-                    🎯 Hiring Recommendation
-                  </h4>
-
-                  <p className="font-semibold text-black">
-                    {summary.hiringRecommendation}
-                  </p>
-                </div>
-
-                {/* Final Feedback */}
-                <div className="bg-white rounded-lg p-5">
-                  <h4 className="font-semibold text-black mb-2">
-                    💬 Final Feedback
-                  </h4>
-
-                  <p className="text-gray-700">
-                    {summary.finalFeedback}
-                  </p>
-                </div>
-
-              </div>
-            )}
-
           </div>
-        )}
-      </div>
+
+          {/* Evaluation */}
+          {evaluation && (
+            <div className="mt-6 bg-[#0b0b0b] border border-[#ff2d8d]/15 rounded-2xl p-7">
+
+              <div className="flex items-center gap-3 mb-6">
+
+                <div className="w-9 h-9 rounded-lg bg-[#ff2d8d]/10 border border-[#ff2d8d]/20 flex items-center justify-center">
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    className="w-5 h-5 text-[#ff2d8d]"
+                  >
+                    <path d="M9 12l2 2 4-4" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-[0.15em] text-[#ff2d8d]">
+                    AI Feedback
+                  </p>
+
+                  <h3 className="text-xl font-semibold mt-1">
+                    Answer Evaluation
+                  </h3>
+                </div>
+
+              </div>
+
+              <div className="text-gray-400 leading-7">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={markdownComponents}
+                >
+                  {evaluation}
+                </ReactMarkdown>
+              </div>
+
+              {/* Next / Finish */}
+              {questionNumber < totalQuestions ? (
+                <button
+                  onClick={handleNextQuestion}
+                  disabled={nextLoading}
+                  className="w-full mt-7 py-3 rounded-xl border border-[#ff2d8d]/30 text-[#ff2d8d] text-sm font-medium hover:bg-[#ff2d8d]/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  {nextLoading
+                    ? "Generating Next Question..."
+                    : "Next Question"}
+                </button>
+              ) : (
+                <button
+                  onClick={handleFinishInterview}
+                  disabled={summaryLoading}
+                  className="w-full mt-7 py-3 rounded-xl bg-[#ff2d8d] text-white text-sm font-medium hover:bg-[#ff469a] disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,45,141,0.12)] transition"
+                >
+                  {summaryLoading
+                    ? "Generating Final Report..."
+                    : "Finish Interview"}
+                </button>
+              )}
+
+            </div>
+          )}
+
+          {/* Final Summary */}
+          {summary && (
+            <div className="mt-6 bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7">
+
+              <div className="mb-7">
+
+                <p className="text-xs uppercase tracking-[0.15em] text-[#ff2d8d] mb-2">
+                  Interview Complete
+                </p>
+
+                <h3 className="text-2xl font-bold">
+                  Interview Summary
+                </h3>
+
+              </div>
+
+              {/* Overall Score */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6 mb-4 text-center">
+
+                <p className="text-sm text-gray-500 mb-2">
+                  Overall Score
+                </p>
+
+                <p className="text-5xl font-bold text-[#ff2d8d]">
+                  {summary.overallScore}
+                  <span className="text-xl text-gray-600">
+                    /100
+                  </span>
+                </p>
+
+              </div>
+
+              {/* Overall Performance */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6 mb-4">
+
+                <p className="text-xs uppercase tracking-wider text-[#ff2d8d] mb-2">
+                  Performance
+                </p>
+
+                <h4 className="font-semibold text-white mb-3">
+                  Overall Performance
+                </h4>
+
+                <p className="text-gray-400 leading-7">
+                  {summary.overallPerformance}
+                </p>
+
+              </div>
+
+              {/* Strengths */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6 mb-4">
+
+                <p className="text-xs uppercase tracking-wider text-[#ff2d8d] mb-2">
+                  Strengths
+                </p>
+
+                <h4 className="font-semibold text-white mb-3">
+                  What You Did Well
+                </h4>
+
+                <ul className="list-disc pl-5 text-gray-400 space-y-2">
+                  {summary.strengths.map((strength, index) => (
+                    <li key={index}>
+                      {strength}
+                    </li>
+                  ))}
+                </ul>
+
+              </div>
+
+              {/* Areas to Improve */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6 mb-4">
+
+                <p className="text-xs uppercase tracking-wider text-[#ff2d8d] mb-2">
+                  Improvement Areas
+                </p>
+
+                <h4 className="font-semibold text-white mb-3">
+                  Areas to Improve
+                </h4>
+
+                <ul className="list-disc pl-5 text-gray-400 space-y-2">
+                  {summary.areasToImprove.map((area, index) => (
+                    <li key={index}>
+                      {area}
+                    </li>
+                  ))}
+                </ul>
+
+              </div>
+
+              {/* Hiring Recommendation */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6 mb-4">
+
+                <p className="text-xs uppercase tracking-wider text-[#ff2d8d] mb-2">
+                  Recommendation
+                </p>
+
+                <h4 className="font-semibold text-white mb-3">
+                  Hiring Recommendation
+                </h4>
+
+                <p className="font-medium text-gray-300">
+                  {summary.hiringRecommendation}
+                </p>
+
+              </div>
+
+              {/* Final Feedback */}
+              <div className="bg-[#080808] border border-white/[0.07] rounded-xl p-6">
+
+                <p className="text-xs uppercase tracking-wider text-[#ff2d8d] mb-2">
+                  Final Feedback
+                </p>
+
+                <h4 className="font-semibold text-white mb-3">
+                  Overall Feedback
+                </h4>
+
+                <p className="text-gray-400 leading-7">
+                  {summary.finalFeedback}
+                </p>
+
+              </div>
+
+            </div>
+          )}
+
+        </div>
+      )}
+
     </div>
   );
 }

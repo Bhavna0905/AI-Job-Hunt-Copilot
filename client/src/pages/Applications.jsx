@@ -25,7 +25,7 @@ function Applications() {
         }
 
         const response = await fetch(
-           `${import.meta.env.VITE_API_URL}/api/applications`,
+          `${import.meta.env.VITE_API_URL}/api/applications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -214,30 +214,66 @@ function Applications() {
     }
   };
 
+  const getStatusClass = (status) => {
+    if (status === "Offer") {
+      return "border-green-500/20 bg-green-500/5 text-green-400";
+    }
+
+    if (status === "Interview") {
+      return "border-[#ff2d8d]/20 bg-[#ff2d8d]/5 text-[#ff2d8d]";
+    }
+
+    if (status === "Rejected") {
+      return "border-red-500/20 bg-red-500/5 text-red-400";
+    }
+
+    return "border-white/10 bg-white/[0.03] text-gray-400";
+  };
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-2">
-        Application Tracker
-      </h1>
+    <div className="min-h-screen bg-[#050505] text-white p-8">
 
-      <p className="text-gray-400 mb-8">
-        Track your job applications in one place.
-      </p>
+      {/* Header */}
+      <div className="mb-10">
+        <p className="text-xs uppercase tracking-[0.2em] text-[#ff2d8d] mb-3">
+          Job Search
+        </p>
 
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          Applications
+        </h1>
+
+        <p className="text-gray-500 mt-3">
+          Track and manage your job applications in one place.
+        </p>
+      </div>
+
+      {/* Error */}
       {error && (
-        <div className="max-w-2xl mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+        <div className="max-w-3xl mb-6 px-5 py-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-sm">
           {error}
         </div>
       )}
 
-      {/* Add / Edit Application Form */}
-      <div className="max-w-2xl bg-white p-6 rounded-xl shadow mb-8">
-        <h2 className="text-xl font-semibold text-black mb-6">
-          {editingId ? "Edit Application" : "Add Application"}
-        </h2>
+      {/* Add / Edit Application */}
+      <div className="max-w-3xl bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-7 mb-10">
+
+        <div className="mb-7">
+          <h2 className="text-xl font-semibold">
+            {editingId ? "Edit Application" : "Add Application"}
+          </h2>
+
+          <p className="text-sm text-gray-600 mt-1">
+            {editingId
+              ? "Update the details of this application."
+              : "Record a new job application."}
+          </p>
+        </div>
 
         <form onSubmit={handleAddApplication}>
-          <label className="block mb-2 font-medium text-black">
+
+          {/* Company */}
+          <label className="block mb-2 text-sm font-medium text-gray-300">
             Company
           </label>
 
@@ -246,10 +282,11 @@ function Applications() {
             placeholder="e.g. Microsoft"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
+            className="w-full border border-white/[0.08] rounded-xl p-3.5 mb-5 text-white bg-[#080808] placeholder-gray-700 focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
           />
 
-          <label className="block mb-2 font-medium text-black">
+          {/* Job Role */}
+          <label className="block mb-2 text-sm font-medium text-gray-300">
             Job Role
           </label>
 
@@ -258,17 +295,18 @@ function Applications() {
             placeholder="e.g. Software Engineer"
             value={jobRole}
             onChange={(e) => setJobRole(e.target.value)}
-            className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
+            className="w-full border border-white/[0.08] rounded-xl p-3.5 mb-5 text-white bg-[#080808] placeholder-gray-700 focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
           />
 
-          <label className="block mb-2 font-medium text-black">
+          {/* Status */}
+          <label className="block mb-2 text-sm font-medium text-gray-300">
             Status
           </label>
 
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
+            className="w-full border border-white/[0.08] rounded-xl p-3.5 mb-5 text-white bg-[#080808] focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
           >
             <option>Applied</option>
             <option>Interview</option>
@@ -276,7 +314,8 @@ function Applications() {
             <option>Offer</option>
           </select>
 
-          <label className="block mb-2 font-medium text-black">
+          {/* Date */}
+          <label className="block mb-2 text-sm font-medium text-gray-300">
             Application Date
           </label>
 
@@ -284,10 +323,11 @@ function Applications() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full border rounded-lg p-3 mb-5 text-black bg-white"
+            className="w-full border border-white/[0.08] rounded-xl p-3.5 mb-5 text-white bg-[#080808] focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
           />
 
-          <label className="block mb-2 font-medium text-black">
+          {/* Notes */}
+          <label className="block mb-2 text-sm font-medium text-gray-300">
             Notes
           </label>
 
@@ -296,101 +336,152 @@ function Applications() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows="4"
-            className="w-full border rounded-lg p-3 mb-6 text-black bg-white resize-none"
+            className="w-full border border-white/[0.08] rounded-xl p-3.5 mb-6 text-white bg-[#080808] placeholder-gray-700 resize-none focus:outline-none focus:border-[#ff2d8d]/50 focus:ring-1 focus:ring-[#ff2d8d]/20 transition"
           />
 
+          {/* Buttons */}
           <div className="flex gap-3">
+
             <button
               type="submit"
-              className="flex-1 bg-black text-white py-3 rounded-lg hover:bg-gray-800"
+              className="flex-1 py-3 rounded-xl bg-[#ff2d8d] text-white font-medium hover:bg-[#ff469a] shadow-[0_0_20px_rgba(255,45,141,0.15)] hover:shadow-[0_0_25px_rgba(255,45,141,0.25)] transition-all"
             >
-              {editingId
-                ? "Update Application"
-                : "+ Add Application"}
+              {editingId ? "Update Application" : "Add Application"}
             </button>
 
             {editingId && (
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="px-6 py-3 border rounded-lg text-black hover:bg-gray-100"
+                className="px-6 py-3 rounded-xl border border-white/[0.1] text-gray-400 hover:text-white hover:bg-white/[0.04] transition"
               >
                 Cancel
               </button>
             )}
+
           </div>
+
         </form>
       </div>
 
-      {/* Applications List */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">
-          Your Applications
-        </h2>
+      {/* Applications */}
+      <div className="max-w-5xl">
+
+        <div className="mb-5">
+          <h2 className="text-xl font-semibold">
+            Your Applications
+          </h2>
+
+          <p className="text-sm text-gray-600 mt-1">
+            {applications.length}{" "}
+            {applications.length === 1
+              ? "application"
+              : "applications"}{" "}
+            tracked
+          </p>
+        </div>
 
         {loading ? (
-          <div className="bg-white p-6 rounded-xl shadow text-gray-500">
+          <div className="bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-8 text-gray-600">
             Loading applications...
           </div>
         ) : applications.length === 0 ? (
-          <div className="bg-white p-6 rounded-xl shadow text-gray-500">
-            No applications added yet.
+          <div className="bg-[#0b0b0b] border border-dashed border-white/[0.1] rounded-2xl p-12 text-center">
+
+            <div className="w-12 h-12 rounded-full border border-[#ff2d8d]/20 bg-[#ff2d8d]/5 flex items-center justify-center mx-auto">
+              <span className="text-[#ff2d8d] text-xl">
+                +
+              </span>
+            </div>
+
+            <p className="text-gray-400 mt-5">
+              No applications added yet.
+            </p>
+
+            <p className="text-gray-600 text-sm mt-1">
+              Add your first application using the form above.
+            </p>
+
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
+
             {applications.map((application) => (
+
               <div
                 key={application._id}
-                className="bg-white p-6 rounded-xl shadow"
+                className="group bg-[#0b0b0b] border border-white/[0.08] rounded-2xl p-6 transition-all duration-300 hover:border-[#ff2d8d]/25 hover:shadow-[0_0_30px_rgba(255,45,141,0.05)]"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-semibold text-black">
+
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-5">
+
+                  {/* Left */}
+                  <div className="min-w-0">
+
+                    <h3 className="text-lg font-semibold text-white">
                       {application.jobRole}
                     </h3>
 
-                    <p className="text-gray-600">
+                    <p className="text-gray-500 mt-1">
                       {application.company}
                     </p>
+
+                    {application.date && (
+                      <p className="text-xs text-gray-600 mt-3">
+                        Applied on {application.date}
+                      </p>
+                    )}
+
+                    {application.notes && (
+                      <p className="text-sm text-gray-500 mt-4 leading-6">
+                        {application.notes}
+                      </p>
+                    )}
+
                   </div>
 
-                  <span className="px-3 py-1 rounded-full bg-gray-100 text-black text-sm">
-                    {application.status}
-                  </span>
+                  {/* Right */}
+                  <div className="flex flex-col md:items-end gap-4">
+
+                    <span
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border ${getStatusClass(
+                        application.status
+                      )}`}
+                    >
+                      {application.status}
+                    </span>
+
+                    <div className="flex items-center gap-4">
+
+                      <button
+                        onClick={() => handleEdit(application)}
+                        className="text-sm text-gray-500 hover:text-[#ff2d8d] transition"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(application._id)}
+                        className="text-sm text-gray-500 hover:text-red-400 transition"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                  </div>
+
                 </div>
 
-                {application.date && (
-                  <p className="text-sm text-gray-500 mt-4">
-                    Applied on: {application.date}
-                  </p>
-                )}
-
-                {application.notes && (
-                  <p className="text-gray-700 mt-3">
-                    {application.notes}
-                  </p>
-                )}
-
-                <div className="mt-4 flex gap-4">
-                  <button
-                    onClick={() => handleEdit(application)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(application._id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    Delete
-                  </button>
-                </div>
               </div>
+
             ))}
+
           </div>
         )}
+
       </div>
+
     </div>
   );
 }
